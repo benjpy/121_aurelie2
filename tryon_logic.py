@@ -10,7 +10,18 @@ load_dotenv()
 
 class VirtualTryOnApp:
     def __init__(self):
-        self.api_key = os.environ.get("RAPIDAPI_KEY")
+        # Try finding key in Streamlit secrets first, then environment
+        self.api_key = None
+        try:
+            import streamlit as st
+            if "RAPIDAPI_KEY" in st.secrets:
+                self.api_key = st.secrets["RAPIDAPI_KEY"]
+        except (ImportError, FileNotFoundError):
+            pass
+        
+        if not self.api_key:
+            self.api_key = os.environ.get("RAPIDAPI_KEY")
+
         self.api_host = "try-on-diffusion.p.rapidapi.com"
         self.api_url = f"https://{self.api_host}/try-on-file"
         
