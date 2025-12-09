@@ -85,11 +85,11 @@ def main():
         
         # Category Selection
         category_map = {
-            "Femme": "femme", 
-            "Enceinte (Pregnant)": "enceinte", 
-            "Homme": "homme", 
-            "Enfant": "enfant", 
-            "Bébé": "bebe"
+            "Woman": "femme", 
+            "Pregnant": "enceinte", 
+            "Man": "homme", 
+            "Child": "enfant", 
+            "Baby": "bebe"
         }
         selected_category_label = st.radio(
             "Target Audience", 

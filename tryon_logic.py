@@ -25,72 +25,73 @@ class VirtualTryOnApp:
         self.api_host = "try-on-diffusion.p.rapidapi.com"
         self.api_url = f"https://{self.api_host}/try-on-file"
         
-        # Asset configuration
+        # Asset configuration: Category -> { Setting Name: Image Path }
+        # Using pre-set scenes where the character is already in the background
         self.assets = {
-            "avatar_woman": "woman.png",
-            "avatar_man": "man.png",
-            "avatar_pregnant": "pregnant.png",
-            "avatar_baby": "baby.png",
-            "bg_indoor": {
-                "Bedroom": "bedroom.png", 
-                "Living Room": "livingroom.png"
+            "femme": {
+                "Living Room": "woman_living_room.png",
+                "Bedroom": "woman_bedroom.png"
             },
-            "bg_baby": {
-                "Playmat": "carpet.png", 
-                "Bed Cover": "bedcover.png"
+            "homme": {
+                "Living Room": "man_living_room.png",
+                "Bedroom": "man_bedroom.png"
+            },
+            "enceinte": {
+                "Living Room": "pregnant_living_room.png",
+                "Bedroom": "pregnant_bedroom.png"
+            },
+            "enfant": {
+                "Living Room": "child_living_room.png",
+                "Bedroom": "child_bedroom.png"
+            },
+            "bebe": {
+                "Carpet": "baby_carpet.png",
+                "Bed Cover": "baby_bedcover.png"
             }
         }
         
     def get_background_options(self, category):
-        """Return available background names for a category."""
-        if category == "bebe":
-            return list(self.assets["bg_baby"].keys())
-        return list(self.assets["bg_indoor"].keys())
+        """Return available setting names for a category."""
+        if category in self.assets:
+            return list(self.assets[category].keys())
+        return []
 
     def generate_tryon(self, garment_path, category, background_name=None):
         """
         Main entry point for generating the try-on image.
-        category: 'femme', 'homme', 'child', 'bebe', 'enceinte'
+        category: 'femme', 'homme', 'enfant', 'bebe', 'enceinte'
         """
         print(f"--- Processing {category.upper()} with {garment_path} ---")
         
-        # Determine background options
-        if category == "bebe":
-            options = self.assets["bg_baby"]
-        else:
-            options = self.assets["bg_indoor"]
+        # Determine scene image
+        options = self.assets.get(category, {})
             
         if background_name and background_name in options:
-            bg_path = options[background_name]
+            scene_path = options[background_name]
+        elif options:
+            scene_path = random.choice(list(options.values()))
         else:
-            bg_path = random.choice(list(options.values()))
+            return None, f"No assets found for category: {category}"
 
         # Unified processing for all categories
-        return self._process_rapidapi(garment_path, category, bg_path)
+        return self._process_rapidapi(garment_path, category, scene_path)
 
-    def _process_rapidapi(self, garment_path, category, bg_path):
-        """Handle All Categories using RapidAPI."""
+    def _process_rapidapi(self, garment_path, category, scene_path):
+        """Handle All Categories using RapidAPI with pre-set scenes."""
         if not self.api_key:
             return None, "Error: RAPIDAPI_KEY not found."
 
-        # Determine avatar
-        if category == "homme":
-            avatar = self.assets["avatar_man"]
-        elif category == "enceinte":
-            avatar = self.assets["avatar_pregnant"]
-        elif category == "bebe":
-            avatar = self.assets["avatar_baby"]
-        else:
-            # Femme and Enfant use woman avatar
-            avatar = self.assets["avatar_woman"]
+        # The 'scene_path' contains the character in the setting.
+        # We pass this as the 'avatar_image'.
+        avatar_image = scene_path
             
-        print(f"Config: Avatar={avatar}, Background={bg_path}")
+        print(f"Config: Avatar/Scene={avatar_image}")
         
         try:
             files = {
                 'clothing_image': (garment_path, open(garment_path, 'rb'), 'image/jpeg'),
-                'avatar_image': (avatar, open(avatar, 'rb'), 'image/png'),
-                'background_image': (bg_path, open(bg_path, 'rb'), 'image/png')
+                'avatar_image': (avatar_image, open(avatar_image, 'rb'), 'image/png'),
+                # 'background_image':  We no longer send a separate background
             }
             headers = {
                 "X-RapidAPI-Key": self.api_key,
