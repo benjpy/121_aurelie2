@@ -19,13 +19,14 @@ class VirtualTryOnApp:
             "avatar_woman": "woman.png",
             "avatar_man": "man.png",
             "avatar_pregnant": "pregnant.png",
+            "avatar_baby": "baby.png",
             "bg_indoor": {
                 "Bedroom": "bedroom.png", 
                 "Living Room": "livingroom.png"
             },
             "bg_baby": {
                 "Playmat": "carpet.png", 
-                "Duvet": "duvet.png"
+                "Bed Cover": "bedcover.png"
             }
         }
         
