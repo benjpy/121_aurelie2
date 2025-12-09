@@ -54,8 +54,7 @@ class VirtualTryOnApp:
         """
         print(f"--- Processing {category.upper()} with {garment_path} ---")
         
-        # Determine background file path
-        bg_path = None
+        # Determine background options
         if category == "bebe":
             options = self.assets["bg_baby"]
         else:
@@ -64,17 +63,13 @@ class VirtualTryOnApp:
         if background_name and background_name in options:
             bg_path = options[background_name]
         else:
-            # Fallback to random if not specified or invalid
-            import random
             bg_path = random.choice(list(options.values()))
 
-        if category == "bebe":
-            return self._process_flat_lay(garment_path, bg_path)
-        else:
-            return self._process_rapidapi(garment_path, category, bg_path)
+        # Unified processing for all categories
+        return self._process_rapidapi(garment_path, category, bg_path)
 
     def _process_rapidapi(self, garment_path, category, bg_path):
-        """Handle Femme, Homme, Enfant, Enceinte using RapidAPI."""
+        """Handle All Categories using RapidAPI."""
         if not self.api_key:
             return None, "Error: RAPIDAPI_KEY not found."
 
@@ -83,10 +78,10 @@ class VirtualTryOnApp:
             avatar = self.assets["avatar_man"]
         elif category == "enceinte":
             avatar = self.assets["avatar_pregnant"]
+        elif category == "bebe":
+            avatar = self.assets["avatar_baby"]
         else:
-            # Femme and Enfant use woman avatar (Enfant uses adult model as placeholder per logic)
-            # Potentially 'Enfant' could use a scaled down version or different model if available,
-            # but for now reusing 'woman.png' as per previous plan/availability.
+            # Femme and Enfant use woman avatar
             avatar = self.assets["avatar_woman"]
             
         print(f"Config: Avatar={avatar}, Background={bg_path}")
